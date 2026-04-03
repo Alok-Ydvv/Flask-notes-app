@@ -15,6 +15,11 @@ if database_url:
     # Fix for SQLAlchemy (postgres:// -> postgresql://)
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    
+    # Use psycopg (version 3) instead of psycopg2
+    if 'postgresql://' in database_url and '+psycopg' not in database_url:
+        database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
+    
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     print(f"Using PostgreSQL: {database_url[:30]}...")  # Debug log
 else:

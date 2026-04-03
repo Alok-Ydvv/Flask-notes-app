@@ -7,17 +7,21 @@ import os
 app = Flask(__name__)
 
 # Database configuration - PostgreSQL for production, SQLite for local
-if os.environ.get('DATABASE_URL'):
+database_url = os.environ.get('DATABASE_URL')
+print(f"DATABASE_URL from environment: {database_url}")  # Debug log
+
+if database_url:
     # Render provides DATABASE_URL
-    database_url = os.environ.get('DATABASE_URL')
     # Fix for SQLAlchemy (postgres:// -> postgresql://)
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    print(f"Using PostgreSQL: {database_url[:30]}...")  # Debug log
 else:
     # Local development
     basedir = os.path.abspath(os.path.dirname(__file__))
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'notes.db')
+    print("Using SQLite for local development")  # Debug log
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)

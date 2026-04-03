@@ -63,9 +63,11 @@ def delete_note(id):
     db.session.commit()
     return redirect(url_for('index'))
 
+# Create tables before first request
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     # Get port from environment variable for deployment
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=False, host='0.0.0.0', port=port)

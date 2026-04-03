@@ -2,14 +2,21 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import pytz
+import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///notes.db'
+
+# Database configuration - use absolute path for SQLite
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'notes.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# Timezone setup
-IST = pytz.timezone('Asia/Kolkata')
+# Timezone setup - handle timezone errors gracefully
+try:
+    IST = pytz.timezone('Asia/Kolkata')
+except:
+    IST = pytz.UTC
 
 # Database Model
 class Note(db.Model):
@@ -59,4 +66,6 @@ def delete_note(id):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Get port from environment variable for deployment
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)

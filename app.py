@@ -6,9 +6,19 @@ import os
 
 app = Flask(__name__)
 
-# Database configuration - use absolute path for SQLite
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'notes.db')
+# Database configuration - PostgreSQL for production, SQLite for local
+if os.environ.get('DATABASE_URL'):
+    # Render provides DATABASE_URL
+    database_url = os.environ.get('DATABASE_URL')
+    # Fix for SQLAlchemy (postgres:// -> postgresql://)
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    # Local development
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'notes.db')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
